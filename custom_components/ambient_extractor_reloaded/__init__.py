@@ -12,6 +12,7 @@ import voluptuous as vol
 
 from homeassistant.components.light import (
     ATTR_RGB_COLOR,
+    ATTR_BRIGHTNESS,
     DOMAIN as LIGHT_DOMAIN,
     LIGHT_TURN_ON_SCHEMA,
 )
@@ -67,6 +68,10 @@ def weighted_average_color(palette):
     avg_rgb = tuple(round(c / total_weight) for c in weighted_sum)
     return avg_rgb
 
+def get_brightness(rgb):
+    r, g, b = rgb
+    return round(colorsys.rgb_to_hsv(r/255, g/255, b/255)[2] * 255)
+
 def _get_color(file_handler) -> tuple:
     """Given an image file, extract the predominant color from it."""
     color_thief = ColorThief(file_handler)
@@ -113,6 +118,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         if color:
             service_data[ATTR_RGB_COLOR] = color
+            service_data[ATTR_BRIGHTNESS] = get_brightness(color)
 
             await hass.services.async_call(
                 LIGHT_DOMAIN, LIGHT_SERVICE_TURN_ON, service_data, blocking=True
