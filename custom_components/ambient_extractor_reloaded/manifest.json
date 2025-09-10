@@ -1,0 +1,10 @@
+{
+  "version": "0.6.1",
+  "domain": "ambient_extractor_reloaded",
+  "name": "Ambient Extractor Reloaded",
+  "config_flow": true,
+  "documentation": "https://github.com/MrPatben8/homeassistant-ambient-extractor-reloaded",
+  "issues": "https://github.com/MrPatben8/homeassistant-ambient-extractor-reloaded/issues",
+  "requirements": ["colorthief==0.2.1"],
+  "codeowners": ["@xplus2", "@MrPatben8", "@GenericStudent"]
+}

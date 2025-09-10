@@ -64,20 +64,20 @@ When using multiple ZHA light entities, consider creating a ZHA group to off-loa
 
 ### Manual installation
 
-1. Copy the folder `ambient_extractor` to `custom_components` in your Home Assistant `config` folder.
+1. Copy the folder `ambient_extractor_reloaded` to `custom_components` in your Home Assistant `config` folder.
 2. [Configure the integration](#configuration).
 3. Restart Home Assistant.
 
 ## Configuration
 Add the following line to your `configuration.yaml` (not needed when using HACS):
 
-    ambient_extractor:
+    ambient_extractor_reloaded:
 
 
 ## Usage examples
 
 ```yaml
-service: ambient_extractor.turn_on
+service: ambient_extractor_reloaded.turn_on
 data_template:
   ambient_extract_url: "http://enigma2/grab?format=png&mode=video&r=96"
   entity_id:
@@ -100,7 +100,7 @@ data_template:
 ### Using helper variables
 
 ```yaml
-service: ambient_extractor.turn_on
+service: ambient_extractor_reloaded.turn_on
 data_template:
   ambient_extract_url: "http://127.0.0.1:8123{{ states.media_player.firetv.attributes.entity_picture }}"
   entity_id:
@@ -137,7 +137,7 @@ condition:
     entity_id: media_player.enigma2
     state: playing
 action:
-  - service: ambient_extractor.turn_on
+  - service: ambient_extractor_reloaded.turn_on
     data_template:
       ambient_extract_url: "http://enigma2/grab?format=png&mode=video&r=96"
       entity_id:
@@ -149,7 +149,7 @@ action:
       minutes: 0
       seconds: 0
       milliseconds: 350
-  - service: ambient_extractor.turn_on
+  - service: ambient_extractor_reloaded.turn_on
     data_template:
       ambient_extract_url: "http://enigma2/grab?format=png&mode=video&r=96"
       entity_id:
@@ -174,7 +174,7 @@ condition:
     entity_id: media_player.enigma2
     state: playing
 action:
-  - service: ambient_extractor.turn_on
+  - service: ambient_extractor_reloaded.turn_on
     data_template:
       ambient_extract_url: "http://enigma2/grab?format=png&mode=video&r=64"
       entity_id:
@@ -190,7 +190,7 @@ action:
       minutes: 0
       seconds: 0
       milliseconds: 200
-  - service: ambient_extractor.turn_on
+  - service: ambient_extractor_reloaded.turn_on
     data_template:
       ambient_extract_url: "http://enigma2/grab?format=png&mode=video&r=64"
       entity_id:
@@ -205,7 +205,7 @@ action:
       minutes: 0
       seconds: 0
       milliseconds: 200
-  - service: ambient_extractor.turn_on
+  - service: ambient_extractor_reloaded.turn_on
     data_template:
       ambient_extract_url: "http://enigma2/grab?format=png&mode=video&r=64"
       entity_id:
@@ -227,7 +227,7 @@ trigger:
   - platform: state
     entity_id: media_player.firetv
 action:
-  - service: ambient_extractor.turn_on
+  - service: ambient_extractor_reloaded.turn_on
     data_template:
       ambient_extract_url: "http://127.0.0.1:8123{{ states.media_player.firetv.attributes.entity_picture }}"
       entity_id:
