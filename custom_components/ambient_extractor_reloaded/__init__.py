@@ -5,6 +5,7 @@ import io
 import logging
 
 import aiohttp
+import colorsys
 from colorthief import ColorThief
 from PIL import UnidentifiedImageError
 import voluptuous as vol
@@ -46,13 +47,35 @@ def _get_file(file_path):
     """
     return file_path
 
+def weighted_average_color(palette):
+    weighted_sum = [0, 0, 0]
+    total_weight = 0
+
+    for (r, g, b) in palette:
+        h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
+
+        weight = s
+
+        weighted_sum[0] += r * weight
+        weighted_sum[1] += g * weight
+        weighted_sum[2] += b * weight
+        total_weight += weight
+    
+    if total_weight == 0:
+        return (0, 0, 0)
+    
+    avg_rgb = tuple(round(c / total_weight) for c in weighted_sum)
+    return avg_rgb
 
 def _get_color(file_handler) -> tuple:
     """Given an image file, extract the predominant color from it."""
     color_thief = ColorThief(file_handler)
 
     # get_color returns a SINGLE RGB value for the given image
-    color = color_thief.get_color(quality=1)
+    #color = color_thief.get_color(quality=1)
+
+    palette = color_thief.get_palette(color_count=10)
+    color = weighted_average_color(palette)
 
     _LOGGER.debug("Extracted RGB color %s from image", color)
 
