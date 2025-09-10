@@ -1,27 +1,23 @@
-# Ambient Extractor
 
-Fork of [color_extractor](https://www.home-assistant.io/integrations/color_extractor/), adding automatic brightness.
+# Ambient Extractor Reloaded
 
+Functionality forked from [color_extractor](https://www.home-assistant.io/integrations/color_extractor/), with vastly improved color extraction, ideal for mood lighting.
+HACS integration forked from [ambient_extractor](https://github.com/xplus2/homeassistant-ambient-extractor).
+
+## What is AER?
 Like color_extractor, this integration will extract the predominant color from a given image and apply it to a target light. 
-Additionally, overall brightness can be calculated and applied within adjustable limits. Useful as part of an automation.
+This version improves the color extraction for use in mood lighting by prioritizing colors over grayscale in the image.
+This is achieved by using ColorThief to extract a color palette from the image, then performing a weighted average on the colors, using the color's hue as a weight. This means that grayscale colors and light colors have a lesser impact on the final extracted color, making for more colorful and meaningful lighting. Additionally, this integration also adjusts the light brightness in order to more accurately represent the extracted color.
 
-### Service data attributes
-| Attribute | Optional | Type | Default | Description |
-|--|--|--|--|--|
-| ambient_extract_url | * | URI | - | The full URL (including schema, `http://`, `https://`) of the image to process
-| ambient_extract_path | * | String | - | The full path to the image file on local storage we’ll process
-| entity_id | No | String | - | The light(s) we’ll set color and/or brightness of
-| color_temperature | Yes | Int: 1.000 to 40.000 | 6.600 K | Apply color temperature correction
-| brightness_auto | Yes | Boolean | False | Detect and set brightness
-| brightness_mode | Yes | mean rms natural dominant | mean | Brightness calculation method. `mean` and `rms` use a grayscale image, `natural` uses perceived brightness, `dominant` the same color as for RGB (fastest).
-| brightness_min  | Yes | Int: 0 to 255 | 2 | Minimal brightness. `< 2` means off for most devices.
-| brightness_max  | Yes | Int: 0 to 255 | 70 | Maximal brightness, should be `> brightness_min`.
-| crop_left | Yes | Int: 0 to 99 | 0 | Crop area: Left offset in % of image width. Default: 0
-| crop_top | Yes | Int: 0 to 99 | 0 | Crop area: Top offset in % of image height. Default: 0
-| crop_width | Yes | Int: 0 to 100 | 0 | Crop area: Width. Default: 0 (= no cropping)
-| crop_height | Yes | Int: 0 to 100 | 0 | Crop area: Height. Default: 0 (= no cropping)
+![Comparison of old color extraction method vs new one](https://i.ibb.co/hxqR7JpX/Comparisson.png)
 
-*) Either `ambient_extract_url`or `ambient_extract_path`needs to be set. 
+### Actions
+| Key| Example| Description |
+|--|--|--|
+| ``color_extract_url``| ```https://example.com/images/logo.png```|The full URL (including schema, `http://`, `https://`) of the image to process|
+|``color_extract_path``|```/tmp/album.png```|The full path to the image file on local storage we’ll process|
+|``entity_id``|``light.shelf_leds``| The RGB capable light we’ll set the color and brightness of
+
 
 **Please ensure any [external URLs](https://www.home-assistant.io/docs/configuration/basic/#allowlist_external_urls) or [external files](https://www.home-assistant.io/docs/configuration/basic/#allowlist_external_dirs) are authorized for use, you will receive error messages if this component is not allowed access to these external resources.**
 
@@ -32,25 +28,57 @@ homeassistant:
     - http://yourdevice:port/screenshot
     - http://enigmareceiver/grab?format=png&mode=video&r=64
 ```
+### URL Action
 
-Besides `rgb_color`and `brightness`, feel free to set [generic light](https://www.home-assistant.io/integrations/light/) attributes. For a static brightness setting, don't enable `brightness_auto`, just add a `brightness: ` or `brightness_pct:` value.
+Add the parameter key `color_extract_url` to the action.
 
-### Automation trigger recommendations
+This action allows you to pass in the URL of an image, have it downloaded, get the predominant color from it, and then set a light’s RGB value to it.
 
-Slow sources like Android Debug Bridge (ADB) can take up to 15 seconds for a fully sized screenshot.
+### File Action
+
+Add the parameter key `color_extract_path` to the action.
+
+This action is very similar to the URL action above, except it processes a file from the local file storage.
+
+## Example Automations
+
+Example usage in an automation, taking the album art present on a Chromecast and supplying it to `light.shelf_leds` whenever it changes:
+
 ```yaml
-trigger:
-  - platform: time_pattern
-    seconds: "*/15"
-    minutes: "*"
-    hours: "*"
-  - platform: state
-    entity_id: media_player.firetv
+#automation.yaml
+- alias: "Chromecast to Shelf Lights"
+
+  triggers:
+    - trigger: state
+      entity_id: media_player.chromecast
+
+  actions:
+    - action: ambient_extractor_reloaded.turn_on
+      data_template:
+        color_extract_url: "{{ states.media_player.chromecast.attributes.entity_picture }}"
+        entity_id: light.shelf_leds
 ```
 
-Ideal conditions using a fast source and scaled down images may allow for 2-3 times per second.
-Enigma2 example: `http://enigma2/grab?format=png&mode=video&r=64`.
-When using multiple ZHA light entities, consider creating a ZHA group to off-load your ZigBee network. 
+With a nicer transition period of 5 seconds and setting brightness to 100% each time (part of the [`light.turn_on`](https://www.home-assistant.io/integrations/light#action-lightturn_on) action parameters):
+
+```yaml
+#automation.yaml
+- alias: "Nicer Chromecast to Shelf Lights"
+
+  triggers:
+    - trigger: state
+      entity_id: media_player.chromecast
+
+  actions:
+    - action: ambient_extractor_reloaded.turn_on
+      data_template:
+        color_extract_url: "{{ states.media_player.chromecast.attributes.entity_picture }}"
+        entity_id: light.shelf_leds
+        brightness_pct: 100
+        transition: 5
+```
+
+
 
 
 ## Installation
@@ -58,8 +86,8 @@ When using multiple ZHA light entities, consider creating a ZHA group to off-loa
 ### Using HACS
 
 1. Ensure that [HACS](https://github.com/hacs/integration) is installed.
-2. Add Custom repository `https://github.com/xplus2/homeassistant-ambient-extractor`. Category `Integration`.
-3. Install the "Ambient Extractor" integration.
+2. Add Custom repository `https://github.com/MrPatben8/homeassistant-ambient-extractor-reloaded.git`. Category `Integration`.
+3. Install the "Ambient Extractor Reloaded" integration.
 4. Restart Home Assistant.
 
 ### Manual installation
