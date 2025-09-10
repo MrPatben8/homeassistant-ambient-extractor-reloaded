@@ -63,7 +63,7 @@ def weighted_average_color(palette):
         total_weight += weight
     
     if total_weight == 0:
-        return (0, 0, 0)
+        return (128, 128, 128)
     
     avg_rgb = tuple(round(c / total_weight) for c in weighted_sum)
     return avg_rgb
@@ -79,7 +79,7 @@ def _get_color(file_handler) -> tuple:
     # get_color returns a SINGLE RGB value for the given image
     #color = color_thief.get_color(quality=1)
 
-    palette = color_thief.get_palette(color_count=10)
+    palette = color_thief.get_palette(color_count=5)
     color = weighted_average_color(palette)
 
     _LOGGER.debug("Extracted RGB color %s from image", color)
